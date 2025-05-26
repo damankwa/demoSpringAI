@@ -9,8 +9,11 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.MapOutputConverter;
 import org.springframework.ai.template.st.StTemplateRenderer;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +51,22 @@ public class Youtube {
 
         String prompt = promptTemplate.render(Map.of("genre", genre));
         return this.chatModel.call(prompt);
+
+    }
+
+    //http://localhost:8080/youtube/author/craig%20walls
+    @GetMapping("/author/{author}")
+    public Map<String, Object> getAuthorsSocialLinks(@PathVariable String author){
+
+            Map<String, Object> result = ChatClient.create(chatModel).prompt()
+        .user(u -> u.text("Generate a list of links for the author {author}")
+                    .param("author", "Include the authors name as the key and any social network\r\n" + //
+                                                "            links as the object {format} 'numbers'"))
+        .call()
+        .entity(new ParameterizedTypeReference<Map<String, Object>>() {});
+
+        return result;
+        
 
     }
 }
