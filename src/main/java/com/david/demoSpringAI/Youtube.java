@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/youtube")
+@RequestMapping("/prompts")
 public class Youtube {
 
     private final ChatClient chatClient;
@@ -30,7 +30,7 @@ public class Youtube {
         this.chatModel = chatModel;
     }
 
-    //http://localhost:8080/youtube/popular?genre=technology
+    //http://localhost:8080/prompts/popular?genre=technology
     @GetMapping("/popular")
     public String findPopularYouTubersByGenre(@RequestParam(value="genre", defaultValue = "Why is the sky blue?") String genre){
 
@@ -54,7 +54,7 @@ public class Youtube {
 
     }
 
-    //http://localhost:8080/youtube/author/craig%20walls
+    //http://localhost:8080/prompts/author/craig%20walls
     @GetMapping("/author/{author}")
     public Map<String, Object> getAuthorsSocialLinks(@PathVariable String author){
 
@@ -68,5 +68,22 @@ public class Youtube {
         return result;
         
 
+    }
+
+    //http://localhost:8080/prompts/by-author
+    @GetMapping("/by-author")
+    public Author getBooksByAuthor(@RequestParam(value = "author", defaultValue = "Stephen King") String author){
+
+        String message1 = """
+                Generate a list of books written by the author {author}. If you aren't positive that a book
+            belongs to this author please don't include it
+                """;
+
+        var authorRet= ChatClient.create(this.chatModel).prompt()
+        .user(message1)
+        .call()
+        .entity(Author.class);
+        return authorRet;
+    
     }
 }
